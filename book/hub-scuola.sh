@@ -9,7 +9,7 @@
 
 # Cambia le variabili qui perchè non ho voglia di fare check negli argomenti.
 
-IMG_PATH="https://ms-pdf.hubscuola.it/i/d/6111755/h/g1AAAABMeJwVxEEOgDAIRFHjiSAthe68ygzUuPH-W-t_yX_O99j9u9RSLBejoIbR6RTC3LiBaDFGF12z623Zoko1UiYkpxP-AbSZE1A/"
+BASE_LINK="https://ms-pdf.hubscuola.it/i/d/6111755/h/g1AAAABMeJwVxEEOgDAIRFHjiSAthe68ygzUuPH-W-t_yX_O99j9u9RSLBejoIbR6RTC3LiBaDFGF12z623Zoko1UiYkpxP-AbSZE1A/"
 
 TOKEN="SFMyNTY.g2gDYQN0AAAAAm0AAAALZG9jdW1lbnRfaWRtAAAABzYxMTE3NTVtAAAABWxheWVybQAAAABiYybxLA.vN8RbW-ac5yoxEX6LeER999pW_6LOXIOA4wnqIVBaKA"
 
@@ -50,29 +50,20 @@ get_page() {
 
 # check if argument is num
 
-case $1 in
-    ''|*[!0-9]*) echo "Input a fucking number, moron" ;;
-    *)
-        PAGE_NUM=$1
+make_book() {
+    DOWNLOAD_DIR=$1;
 
-        ((PAGE_NUM=PAGE_NUM-1))
+    OLD_PWD=$(pwd)
 
-        if [ -n $2 ]; then
-            DOWNLOAD_DIR=$2;
-        fi
+    cd "${DOWNLOAD_DIR}"
 
-        OLD_PWD=$(pwd)
+    for i in $(seq 0 $PAGE_NUM); do
+        get_page $i $BASE_LINK
+    done
 
-        cd "${DOWNLOAD_DIR}"
+    mkdir tmpdir
 
-        for i in $(seq 0 $PAGE_NUM); do
-            get_page "$i"
-        done
+    MAGICK_TMPDIR=./tmpdir convert -limit memory 2GiB -limit map 4GiB *.png book.pdf
 
-        mkdir tmpdir
-
-        MAGICK_TMPDIR=./tmpdir convert -limit memory 2GiB -limit map 4GiB *.png book.pdf
-
-        cd "${OLD_PWD}"
-        ;;
-esac
+    cd "${OLD_PWD}"
+}
